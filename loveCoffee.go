@@ -33,6 +33,7 @@ func runExe(ap string, path string) string {
   var output bytes.Buffer
   exeCmd.Stdout = &output
 
+
   err := exeCmd.Run()
   if err != nil {
   //  log.Fatal(err)
@@ -86,6 +87,7 @@ func executeCommand(cmd string) string {
   exeCmd.Stdin = strings.NewReader("")
   var output bytes.Buffer
   exeCmd.Stdout = &output
+
 
   err := exeCmd.Run()
   if err != nil {
